@@ -1,0 +1,33 @@
+{
+  "name": "aesid",
+  "version": "1.0.0",
+  "description": "aes for sid",
+  "main": "index.js",
+  "scripts": {
+    "test": "cross-env DEBUG=aesid* mocha test/test_*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bacra/node-aesid.git"
+  },
+  "keywords": [
+    "aes",
+    "sid"
+  ],
+  "author": "bacra <bacra.woo@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Bacra/node-aesid/issues"
+  },
+  "homepage": "https://github.com/Bacra/node-aesid#readme",
+  "dependencies": {
+    "debug": "^4.1.1",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "cross-env": "^6.0.0",
+    "eslint-config-brcjs": "^1.0.0",
+    "expect.js": "^0.3.1",
+    "mocha": "^6.2.1"
+  }
+}
