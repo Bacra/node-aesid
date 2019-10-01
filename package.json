@@ -4,7 +4,10 @@
   "description": "aes for sid",
   "main": "index.js",
   "scripts": {
-    "test": "cross-env DEBUG=aesid* mocha test/test_*.js"
+    "lint": "eslint .",
+    "test": "cross-env DEBUG=aesid* mocha test/test_*.js",
+    "test-cov": "istanbul cover _mocha -- test/test_* --reporter dot",
+    "test-travis": "istanbul cover _mocha --report lcovonly -- test/test_* --reporter dot"
   },
   "repository": {
     "type": "git",
@@ -25,9 +28,12 @@
     "lodash": "^4.17.15"
   },
   "devDependencies": {
+    "babel-eslint": "^10.0.3",
     "cross-env": "^6.0.0",
-    "eslint-config-brcjs": "^1.0.0",
+    "eslint": "^6.5.1",
+    "eslint-config-brcjs": "^1.1.1",
     "expect.js": "^0.3.1",
+    "istanbul": "^0.4.5",
     "mocha": "^6.2.1"
   }
 }
