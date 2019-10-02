@@ -1,6 +1,6 @@
 {
   "name": "aesid",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "aes for sid",
   "main": "index.js",
   "scripts": {

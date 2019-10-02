@@ -77,6 +77,17 @@ module.exports = function(options) {
 
 	return {
 		encrypt,
-		decrypt
+		decrypt,
+
+		business: function(businessType) {
+			return {
+				encrypt: function(data, userid) {
+					return encrypt(businessType, data, userid);
+				},
+				decrypt: function(sid, userid) {
+					return decrypt(businessType, sid, userid);
+				},
+			}
+		}
 	};
 };
