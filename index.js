@@ -23,10 +23,17 @@ module.exports = function(options) {
 
 	debug('business init: %o', businessMap);
 
-	function encrypt(businessType, data) {
-		const AES_VERSION = businessMap[businessType].last;
-		const AES_KEY = businessMap[businessType][AES_VERSION];
+	function encrypt(businessType, data, userid) {
+		if (options.userid && !Buffer.isBuffer(userid) && typeof userid != 'string') {
+			userid = '' + userid;
+		}
+
 		const IV = crypto.randomBytes(16);
+		const AES_VERSION = businessMap[businessType].last;
+		const BUSINESS_AES_KEY = businessMap[businessType][AES_VERSION];
+		const AES_KEY = options.userid
+			? crypto.createHmac('sha256', BUSINESS_AES_KEY).update(userid).digest()
+			: BUSINESS_AES_KEY;
 
 		const buf = Buffer.from('' + data);
 
@@ -45,10 +52,17 @@ module.exports = function(options) {
 		return Buffer.concat(output).toString('base64');
 	}
 
-	function decrypt(businessType, sid) {
+	function decrypt(businessType, sid, userid) {
+		if (options.userid && !Buffer.isBuffer(userid) && typeof userid != 'string') {
+			userid = '' + userid;
+		}
+
 		const buf = Buffer.from(sid, 'base64');
 		const AES_VERSION = buf.readUInt8(1);
-		const AES_KEY = businessMap[businessType][AES_VERSION];
+		const BUSINESS_AES_KEY = businessMap[businessType][AES_VERSION];
+		const AES_KEY = options.userid
+			? crypto.createHmac('sha256', BUSINESS_AES_KEY).update(userid).digest()
+			: BUSINESS_AES_KEY;
 
 		if (!Buffer.isBuffer(AES_KEY)) throw new Error('Not Found AES KEY');
 
