@@ -35,7 +35,7 @@ module.exports = function(options) {
 			? crypto.createHmac('sha256', BUSINESS_AES_KEY).update(userid).digest()
 			: BUSINESS_AES_KEY;
 
-		const buf = Buffer.from('' + data);
+		const buf = Buffer.isBuffer(data) ? data : Buffer.from('' + data);
 
 		const output = [
 			// 预留版本号
@@ -57,7 +57,8 @@ module.exports = function(options) {
 			userid = '' + userid;
 		}
 
-		const buf = Buffer.from(sid, 'base64');
+		const buf = Buffer.isBuffer(sid) ? sid : Buffer.from(sid, 'base64');
+
 		const AES_VERSION = buf.readUInt8(1);
 		const BUSINESS_AES_KEY = businessMap[businessType][AES_VERSION];
 		const AES_KEY = options.userid
