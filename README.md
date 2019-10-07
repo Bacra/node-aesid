@@ -11,7 +11,7 @@
 
 `npm install aesid --save`
 
-## Useage
+## Usage
 
 ```javascript
 const aesid = require('aesid');
