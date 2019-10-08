@@ -8,36 +8,36 @@ const FEATURE_USRID = 1 << 0;
 /**
  * options.userid  true/false/auto  是否使用userid进行额外加密
  */
-module.exports = function(options) {
+module.exports = function(aesObj, options) {
+	if (!aesObj) throw new Error('AES KEY MISS');
 	if (!options) options = {};
-	const businessMap = {};
 
-	_.each(options.business, function(keys, businessType) {
-		const newkeys = businessMap[businessType] = {};
-		if (!Array.isArray(keys)) keys = [{version: 0, aes: keys}];
+	const aseKeys = {};
+	if (!Array.isArray(aesObj)) aesObj = [{version: 0, aes: aesObj}];
 
-		keys.forEach(function(item) {
-			if (!item) return;
+	aesObj.forEach(function(item) {
+		if (!item) return;
 
-			if (isNaN(item.version)) {
-				debug('ignore nan version for aes: %o', item);
-				return;
-			}
+		if (isNaN(item.version)) {
+			debug('ignore nan version for aes: %o', item);
+			return;
+		}
 
-			const version = +item.version;
-			if (newkeys[version]) {
-				debug('aes version repeat: %s %s, all keys: %o', businessType, version, keys);
-				throw new Error('AES VERSION IS REPEAT,' + businessType + ',' + version);
-			}
+		const version = +item.version;
+		if (aseKeys[version]) {
+			debug('aes version repeat: %s %s, all keys: %o', version, aesObj);
+			throw new Error('AES VERSION IS REPEAT,' + version);
+		}
 
-			newkeys[version] = Buffer.alloc(32, Buffer.from(item.aes));
-			newkeys.last = version;
-		});
+		aseKeys[version] = Buffer.alloc(32, Buffer.from(item.aes));
+		aseKeys.last = version;
 	});
 
-	debug('business init: %o', businessMap);
+	if (!('last' in aseKeys)) throw new Error('AES KEY MISS');
 
-	function encrypt(businessType, data, userid) {
+	debug('aesKeys init: %o', aseKeys);
+
+	function encrypt(data, userid) {
 		var isWithUserid = options.userid;
 		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid != 'string') {
 			if (!userid && options.userid == 'auto') {
@@ -53,12 +53,8 @@ module.exports = function(options) {
 		}
 
 		const IV = crypto.randomBytes(16);
-		const businessInfo = businessMap[businessType];
-		if (!businessInfo) throw new Error('BUSINESS_AES_KEY MISS');
-
-		const AES_VERSION = businessInfo.last || 0;
-		const BUSINESS_AES_KEY = businessInfo[AES_VERSION];
-		if (!BUSINESS_AES_KEY) throw new Error('BUSINESS_AES_KEY MISS');
+		const AES_VERSION = aseKeys.last;
+		const BUSINESS_AES_KEY = aseKeys[AES_VERSION];
 
 		const AES_KEY = isWithUserid
 			? crypto.createHmac('sha256', BUSINESS_AES_KEY).update(userid).digest()
@@ -91,7 +87,7 @@ module.exports = function(options) {
 		return buf.readUInt8(2);
 	}
 
-	function decrypt(businessType, sid, userid) {
+	function decrypt(sid, userid) {
 		const buf = Buffer.isBuffer(sid) ? sid : Buffer.from(sid, 'base64');
 
 		const FEATURE_FLAG = buf.readUInt8(1);
@@ -103,10 +99,7 @@ module.exports = function(options) {
 		}
 
 		const AES_VERSION = buf.readUInt8(2);
-		const businessInfo = businessMap[businessType];
-		if (!businessInfo) throw new Error('BUSINESS_AES_KEY MISS');
-
-		const BUSINESS_AES_KEY = businessInfo[AES_VERSION];
+		const BUSINESS_AES_KEY = aseKeys[AES_VERSION];
 		if (!BUSINESS_AES_KEY) throw new Error('BUSINESS_AES_KEY MISS');
 
 		const AES_KEY = isWithUserid
@@ -129,21 +122,5 @@ module.exports = function(options) {
 		decrypt,
 		// debug 使用
 		getDecryptAesVersion,
-
-		business: function(businessType) {
-			if (!businessMap[businessType]) {
-				debug('business type is not found: %s', businessType);
-				return;
-			}
-
-			return {
-				encrypt: function(data, userid) {
-					return encrypt(businessType, data, userid);
-				},
-				decrypt: function(sid, userid) {
-					return decrypt(businessType, sid, userid);
-				},
-			}
-		}
 	};
 };

@@ -3,49 +3,43 @@ const aesid = require('../');
 
 describe('#userid', () => {
 	const content = 'test content';
-	const business = {
-		test: 'test 123'
-	};
-
-	const noUseridSid = aesid({
+	const aseKey = 'test 123';
+	const noUseridSid = aesid(aseKey, {
 		userid: false,
-		business: business,
 	})
-	.encrypt('test', content);
+	.encrypt(content);
 
 
 	describe('#usrid types', () => {
-		const sidAes = aesid({
+		const sidAes = aesid(aseKey, {
 			userid: true,
-			business: business,
 		});
 
 		it('#string', () => {
-			const sid = sidAes.encrypt('test', content, 'userid123');
-			expect(sidAes.decrypt('test', sid, 'userid123')).to.be(content);
+			const sid = sidAes.encrypt(content, 'userid123');
+			expect(sidAes.decrypt(sid, 'userid123')).to.be(content);
 		});
 
 		it('#number', () => {
-			const sid = sidAes.encrypt('test', content, 1234);
-			expect(sidAes.decrypt('test', sid, 1234)).to.be(content);
+			const sid = sidAes.encrypt(content, 1234);
+			expect(sidAes.decrypt(sid, 1234)).to.be(content);
 		});
 
 		it('#buffer', () => {
 			const useridBuf = Buffer.from('userid');
-			const sid = sidAes.encrypt('test', content, useridBuf);
-			expect(sidAes.decrypt('test', sid, useridBuf)).to.be(content);
+			const sid = sidAes.encrypt(content, useridBuf);
+			expect(sidAes.decrypt(sid, useridBuf)).to.be(content);
 		});
 	});
 
 	describe('#options=true', () => {
-		const sidAes = aesid({
+		const sidAes = aesid(aseKey, {
 			userid: true,
-			business: business,
 		});
 
 		it('#noUseridSid', () => {
 			expect(() => {
-				sidAes.decrypt('test', noUseridSid);
+				sidAes.decrypt(noUseridSid);
 				process.exit();
 			})
 			.to.throwError(function(err) {
@@ -54,33 +48,33 @@ describe('#userid', () => {
 		});
 
 		describe('#with userid encrypt', () => {
-			const sid = sidAes.encrypt('test', content, 'userid123');
+			const sid = sidAes.encrypt(content, 'userid123');
 
 			it('#no userid decrypt', () => {
 				expect(() => {
-					sidAes.decrypt('test', sid);
+					sidAes.decrypt(sid);
 				})
 				.to.throwError(/bad decrypt/);
 			});
 
 			it('#not userid decrypt', () => {
 				expect(() => {
-					sidAes.decrypt('test', sid, 'userid456');
+					sidAes.decrypt(sid, 'userid456');
 				})
 				.to.throwError(/bad decrypt/);
 			});
 		});
 
 		describe('#without useid encrypt', () => {
-			const sid = sidAes.encrypt('test', content);
+			const sid = sidAes.encrypt(content);
 
 			it('#no userid decrypt', () => {
-				expect(sidAes.decrypt('test', sid)).to.be(content);
+				expect(sidAes.decrypt(sid)).to.be(content);
 			});
 
 			it('#not userid decrypt', () => {
 				expect(() => {
-					sidAes.decrypt('test', sid, 'userid123')
+					sidAes.decrypt(sid, 'userid123')
 				})
 				.to.throwError(/bad decrypt/);
 			});
@@ -88,39 +82,38 @@ describe('#userid', () => {
 	});
 
 	describe('#options=auto', () => {
-		const sidAes = aesid({
+		const sidAes = aesid(aseKey, {
 			userid: 'auto',
-			business: business,
 		});
 
 		it('#noUseridSid', () => {
-			expect(sidAes.decrypt('test', noUseridSid)).to.be(content);
+			expect(sidAes.decrypt(noUseridSid)).to.be(content);
 		});
 
 		describe('#with userid encrypt', () => {
-			const sid = sidAes.encrypt('test', content, 'userid123');
+			const sid = sidAes.encrypt(content, 'userid123');
 
 			it('#userid decrypt', () => {
-				expect(sidAes.decrypt('test', sid, 'userid123')).to.be(content);
+				expect(sidAes.decrypt(sid, 'userid123')).to.be(content);
 			});
 
 			it('#no userid decrypt', () => {
 				expect(() => {
-					sidAes.decrypt('test', sid)
+					sidAes.decrypt(sid)
 				})
 				.to.throwError(/bad decrypt/);
 			});
 		});
 
 		describe('#without userid encrypt', () => {
-			const sid = sidAes.encrypt('test', content);
+			const sid = sidAes.encrypt(content);
 
 			it('#userid decrypt', () => {
-				expect(sidAes.decrypt('test', sid, 'userid123')).to.be(content);
+				expect(sidAes.decrypt(sid, 'userid123')).to.be(content);
 			});
 
 			it('#no userid decrypt', () => {
-				expect(sidAes.decrypt('test', sid)).to.be(content);
+				expect(sidAes.decrypt(sid)).to.be(content);
 			});
 		});
 	});
