@@ -4,9 +4,7 @@ const aesid = require('../');
 describe('#userid', () => {
 	const content = 'test content';
 	const business = {
-		test: {
-			1: 'test 123'
-		}
+		test: 'test 123'
 	};
 
 	const noUseridSid = aesid({

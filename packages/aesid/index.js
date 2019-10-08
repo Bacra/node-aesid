@@ -12,24 +12,26 @@ module.exports = function(options) {
 	if (!options) options = {};
 	const businessMap = {};
 
-	_.each(options.business, function (keys, businessType) {
+	_.each(options.business, function(keys, businessType) {
 		const newkeys = businessMap[businessType] = {};
-		let hasLastKey = false;
+		if (!Array.isArray(keys)) keys = [{version: 0, aes: keys}];
 
-		_.each(keys, function(aeskey, key) {
-			if (key == 'last') {
-				hasLastKey = true;
-				newkeys.last = +aeskey;
-			} else {
-				if (isNaN(key)) {
-					debug('ignore nan key: %s', key);
-					return;
-				}
+		keys.forEach(function(item) {
+			if (!item) return;
 
-				const version = +key;
-				newkeys[version] = Buffer.alloc(32, Buffer.from(aeskey));
-				if (!hasLastKey) newkeys.last = version;
+			if (isNaN(item.version)) {
+				debug('ignore nan version for aes: %o', item);
+				return;
 			}
+
+			const version = +item.version;
+			if (newkeys[version]) {
+				debug('aes version repeat: %s %s, all keys: %o', businessType, version, keys);
+				throw new Error('AES VERSION IS REPEAT,' + businessType + ',' + version);
+			}
+
+			newkeys[version] = Buffer.alloc(32, Buffer.from(item.aes));
+			newkeys.last = version;
 		});
 	});
 
@@ -84,6 +86,11 @@ module.exports = function(options) {
 		return Buffer.concat(output).toString('base64');
 	}
 
+	function getDecryptAesVersion(sid) {
+		const buf = Buffer.isBuffer(sid) ? sid : Buffer.from(sid, 'base64');
+		return buf.readUInt8(2);
+	}
+
 	function decrypt(businessType, sid, userid) {
 		const buf = Buffer.isBuffer(sid) ? sid : Buffer.from(sid, 'base64');
 
@@ -120,6 +127,8 @@ module.exports = function(options) {
 	return {
 		encrypt,
 		decrypt,
+		// debug 使用
+		getDecryptAesVersion,
 
 		business: function(businessType) {
 			if (!businessMap[businessType]) {

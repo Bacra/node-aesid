@@ -14,14 +14,14 @@
 ```javascript
 const aesid = require('aesid');
 const sidAes = aesid({
-  userid: true,
+  userid: true,   // true/false/auto
   business: {
-    test: {
-      1: 'old test aes key',
-      2: 'new test aes key',
-      // default last one
-      last: 2
-    }
+    test: [
+      // mulit versions
+      { version: 2, aes: 'old test aes key' },
+      { version: 5, aes: 'new test aes key' },
+    ],
+    test2: 'test2 aes key'
   }
 });
 

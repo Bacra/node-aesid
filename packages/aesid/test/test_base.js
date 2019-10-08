@@ -2,12 +2,11 @@ const expect = require('expect.js');
 const aesid = require('../');
 
 describe('#base', () => {
-	it('#base', () => {
+	describe('#base', () => {
 		const sidAes = aesid({
 			business: {
-				test: {
-					1: 'test 123'
-				}
+				test: 'test 123',
+				test2: 'test 123',
 			}
 		});
 
@@ -15,6 +14,8 @@ describe('#base', () => {
 		const sid = sidAes.encrypt('test', content);
 
 		expect(sidAes.decrypt('test', sid)).to.be(content);
+		// 跨业务，同sidkey
+		expect(sidAes.decrypt('test2', sid)).to.be(content);
 
 		expect(() => {
 			sidAes.encrypt('not_exists', content);
@@ -32,35 +33,42 @@ describe('#base', () => {
 	});
 
 
-	it('#version', () => {
-		const sidOptions = {
-			business: {
-				test: {
-					1: 'test 123',
-					2: 'test 1234',
-					last: 1
-				}
-			}
-		};
-
-		const sidAes1 = aesid(sidOptions);
-		sidOptions.business.test.last = 2;
-		const sidAes2 = aesid(sidOptions);
-
+	describe('#version', () => {
 		const content = 'test content';
-		const sid = sidAes1.encrypt('test', content);
+		const sidAes = aesid({
+			business: {
+				test1: [
+					{version: 0, aes: 'test 123'},
+					{version: 3, aes: 'test 1234'},
+				],
+				test2: [
+					{version: 3, aes: 'test 1234'},
+					{version: 0, aes: 'test 123'},
+				]
+			}
+		});
 
-		expect(sidAes1.decrypt('test', sid)).to.be(content);
-		expect(sidAes2.decrypt('test', sid)).to.be(content);
+		it('#getDecryptAesVersion', () => {
+			let sid = sidAes.encrypt('test1', content);
+			expect(sidAes.getDecryptAesVersion(sid)).to.be(3);
+
+			sid = sidAes.encrypt('test2', content);
+			expect(sidAes.getDecryptAesVersion(sid)).to.be(0);
+		});
+
+
+		it('#use last', () => {
+			const sid = sidAes.encrypt('test1', content);
+			expect(sidAes.decrypt('test1', sid)).to.be(content);
+			expect(sidAes.decrypt('test2', sid)).to.be(content);
+		});
 	});
 
 
 	describe('#business', () => {
 		const sidAes = aesid({
 			business: {
-				test: {
-					1: 'test 123'
-				}
+				test: 'test 123'
 			}
 		});
 
