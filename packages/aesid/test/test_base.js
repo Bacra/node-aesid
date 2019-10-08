@@ -15,6 +15,20 @@ describe('#base', () => {
 		const sid = sidAes.encrypt('test', content);
 
 		expect(sidAes.decrypt('test', sid)).to.be(content);
+
+		expect(() => {
+			sidAes.encrypt('not_exists', content);
+		})
+		.to.throwError(err => {
+			expect(err.message).to.be('BUSINESS_AES_KEY MISS');
+		});
+
+		expect(() => {
+			sidAes.decrypt('not_exists', sid);
+		})
+		.to.throwError(err => {
+			expect(err.message).to.be('BUSINESS_AES_KEY MISS');
+		});
 	});
 
 

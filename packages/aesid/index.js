@@ -43,6 +43,10 @@ module.exports = function(options) {
 				debug('userid auto, ignore userid');
 			}
 
+			if (!userid && options.userid === true) {
+				debug('no userid in options.userid=true: %o', userid);
+			}
+
 			userid = '' + userid;
 		}
 
