@@ -14,6 +14,7 @@
 ```javascript
 const aesid = require('aesid');
 const sidAes = aesid({
+  userid: true,
   business: {
     test: {
       1: 'old test aes key',
