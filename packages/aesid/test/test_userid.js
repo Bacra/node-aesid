@@ -2,15 +2,24 @@ const expect = require('expect.js');
 const aesid = require('../');
 
 describe('#userid', () => {
+	const content = 'test content';
+	const business = {
+		test: {
+			1: 'test 123'
+		}
+	};
+
+	const noUseridSid = aesid({
+		userid: false,
+		business: business,
+	})
+	.encrypt('test', content);
+
+
 	describe('#usrid types', () => {
-		const content = 'test content';
 		const sidAes = aesid({
 			userid: true,
-			business: {
-				test: {
-					1: 'test 123'
-				}
-			}
+			business: business,
 		});
 
 		it('#string', () => {
@@ -31,14 +40,19 @@ describe('#userid', () => {
 	});
 
 	describe('#options=true', () => {
-		const content = 'test content';
 		const sidAes = aesid({
 			userid: true,
-			business: {
-				test: {
-					1: 'test 123'
-				}
-			}
+			business: business,
+		});
+
+		it('#noUseridSid', () => {
+			expect(() => {
+				sidAes.decrypt('test', noUseridSid);
+				process.exit();
+			})
+			.to.throwError(function(err) {
+				expect(err.message).to.be('USERID MISS');
+			});
 		});
 
 		describe('#with userid encrypt', () => {
@@ -76,14 +90,13 @@ describe('#userid', () => {
 	});
 
 	describe('#options=auto', () => {
-		const content = 'test content';
 		const sidAes = aesid({
 			userid: 'auto',
-			business: {
-				test: {
-					1: 'test 123'
-				}
-			}
+			business: business,
+		});
+
+		it('#noUseridSid', () => {
+			expect(sidAes.decrypt('test', noUseridSid)).to.be(content);
 		});
 
 		describe('#with userid encrypt', () => {
@@ -113,4 +126,5 @@ describe('#userid', () => {
 			});
 		});
 	});
+
 });
