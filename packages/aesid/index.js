@@ -25,7 +25,7 @@ module.exports = function(aesObj, options) {
 
 		const version = +item.version;
 		if (aseKeys[version]) {
-			debug('aes version repeat: %s %s, all keys: %o', version, aesObj);
+			debug('aes version repeat: %s', version);
 			throw new Error('AES VERSION IS REPEAT,' + version);
 		}
 
@@ -35,7 +35,7 @@ module.exports = function(aesObj, options) {
 
 	if (!('last' in aseKeys)) throw new Error('AES KEY MISS');
 
-	debug('aesKeys init: %o', aseKeys);
+	debug('aesKeys init: %s', Object.keys(aseKeys));
 
 	function encrypt(data, userid) {
 		var isWithUserid = options.userid;
@@ -74,8 +74,6 @@ module.exports = function(aesObj, options) {
 			IV
 		];
 
-		debug('encrypt aeskey: %s, iv: %s', AES_KEY, IV);
-
 		const cipher = crypto.createCipheriv('aes-256-cbc', AES_KEY, IV);
 		output.push(cipher.update(buf), cipher.final());
 
@@ -110,8 +108,6 @@ module.exports = function(aesObj, options) {
 
 		const IV = buf.slice(3, 16 + 3);
 		const decipher = crypto.createDecipheriv('aes-256-cbc', AES_KEY, IV);
-
-		debug('encrypt aeskey: %s, iv: %s', AES_KEY, IV);
 
 		return decipher.update(buf.slice(16 + 3), 'utf8')
 			+ decipher.final('utf8');
