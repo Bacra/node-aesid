@@ -17,6 +17,7 @@ describe('#base', () => {
 		expect(sidAes.decrypt('test', sid)).to.be(content);
 	});
 
+
 	it('#version', () => {
 		const sidOptions = {
 			business: {
@@ -39,19 +40,26 @@ describe('#base', () => {
 		expect(sidAes2.decrypt('test', sid)).to.be(content);
 	});
 
-	it('#business', () => {
-		const aesObj = aesid({
+
+	describe('#business', () => {
+		const sidAes = aesid({
 			business: {
 				test: {
 					1: 'test 123'
 				}
 			}
-		})
-		.business('test');
+		});
 
 		const content = 'test content';
-		const sid = aesObj.encrypt(content);
 
-		expect(aesObj.decrypt(sid)).to.be(content);
+		it('#run', () => {
+			const aesObj = sidAes.business('test');
+			const sid = aesObj.encrypt(content);
+			expect(aesObj.decrypt(sid)).to.be(content);
+		});
+
+		it('#not found', () => {
+			expect(sidAes.business('not_exists')).to.be(undefined);
+		});
 	});
 });

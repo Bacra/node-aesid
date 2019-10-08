@@ -47,8 +47,13 @@ module.exports = function(options) {
 		}
 
 		const IV = crypto.randomBytes(16);
-		const AES_VERSION = businessMap[businessType].last;
-		const BUSINESS_AES_KEY = businessMap[businessType][AES_VERSION];
+		const businessInfo = businessMap[businessType];
+		if (!businessInfo) throw new Error('BUSINESS_AES_KEY MISS');
+
+		const AES_VERSION = businessInfo.last || 0;
+		const BUSINESS_AES_KEY = businessInfo[AES_VERSION];
+		if (!BUSINESS_AES_KEY) throw new Error('BUSINESS_AES_KEY MISS');
+
 		const AES_KEY = isWithUserid
 			? crypto.createHmac('sha256', BUSINESS_AES_KEY).update(userid).digest()
 			: BUSINESS_AES_KEY;
@@ -87,7 +92,12 @@ module.exports = function(options) {
 		}
 
 		const AES_VERSION = buf.readUInt8(2);
-		const BUSINESS_AES_KEY = businessMap[businessType][AES_VERSION];
+		const businessInfo = businessMap[businessType];
+		if (!businessInfo) throw new Error('BUSINESS_AES_KEY MISS');
+
+		const BUSINESS_AES_KEY = businessInfo[AES_VERSION];
+		if (!BUSINESS_AES_KEY) throw new Error('BUSINESS_AES_KEY MISS');
+
 		const AES_KEY = isWithUserid
 			? crypto.createHmac('sha256', BUSINESS_AES_KEY).update(userid).digest()
 			: BUSINESS_AES_KEY;
@@ -108,6 +118,11 @@ module.exports = function(options) {
 		decrypt,
 
 		business: function(businessType) {
+			if (!businessMap[businessType]) {
+				debug('business type is not found: %s', businessType);
+				return;
+			}
+
 			return {
 				encrypt: function(data, userid) {
 					return encrypt(businessType, data, userid);
