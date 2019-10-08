@@ -34,14 +34,19 @@ describe('#base', () => {
 		});
 
 		expect(() => {
-			aesid([ {version: 'a', aes: '234235'} ]);
+			aesid([
+				{ version: 'a', aes: '234235' }
+			]);
 		})
 		.to.throwError(err => {
 			expect(err.message).to.be('AES KEY MISS');
 		});
 
 		expect(() => {
-			aesid([ {version: 1, aes: '234235'}, {version: 1, aes: '23443'} ]);
+			aesid([
+				{ version: 1, aes: '234235' },
+				{ version: 1, aes: '23443' }
+			]);
 		})
 		.to.throwError(err => {
 			expect(err.message).to.be('AES VERSION IS REPEAT,1');
