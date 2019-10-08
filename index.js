@@ -10,13 +10,19 @@ module.exports = function(options) {
 		const newkeys = businessMap[businessType] = {};
 		let hasLastKey = false;
 
-		_.each(keys, function(aeskey, version) {
-			if (version == 'last') {
+		_.each(keys, function(aeskey, key) {
+			if (key == 'last') {
 				hasLastKey = true;
 				newkeys.last = +aeskey;
 			} else {
-				newkeys[+version] = Buffer.alloc(32, Buffer.from(aeskey));
-				if (!hasLastKey) newkeys.last = +version;
+				if (isNaN(key)) {
+					debug('ignore nan key: %s', key);
+					return;
+				}
+
+				const version = +key;
+				newkeys[version] = Buffer.alloc(32, Buffer.from(aeskey));
+				if (!hasLastKey) newkeys.last = version;
 			}
 		});
 	});
