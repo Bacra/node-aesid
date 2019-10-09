@@ -80,13 +80,20 @@ module.exports = function(aesObj, options) {
 		return Buffer.concat(output).toString('base64');
 	}
 
-	function getDecryptAesVersion(sid) {
-		const buf = Buffer.isBuffer(sid) ? sid : Buffer.from(sid, 'base64');
+	function _sidToBuffer(sid) {
+		return Buffer.isBuffer(sid) ? sid : Buffer.from(sid, 'base64');
+	}
+
+	function _getDecryptAesVersion(buf) {
 		return buf.readUInt8(2);
 	}
 
+	function _getDecryptAesIV(buf) {
+		return buf.slice(3, 16 + 3);
+	}
+
 	function decrypt(sid, userid) {
-		const buf = Buffer.isBuffer(sid) ? sid : Buffer.from(sid, 'base64');
+		const buf = _sidToBuffer(sid);
 
 		const FEATURE_FLAG = buf.readUInt8(1);
 		const isWithUserid = FEATURE_FLAG & FEATURE_USRID;
@@ -96,7 +103,7 @@ module.exports = function(aesObj, options) {
 			userid = '' + userid;
 		}
 
-		const AES_VERSION = buf.readUInt8(2);
+		const AES_VERSION = _getDecryptAesVersion(buf);
 		const BUSINESS_AES_KEY = aseKeys[AES_VERSION];
 		if (!BUSINESS_AES_KEY) throw new Error('BUSINESS_AES_KEY MISS');
 
@@ -106,7 +113,7 @@ module.exports = function(aesObj, options) {
 
 		if (!Buffer.isBuffer(AES_KEY)) throw new Error('Not Found AES KEY');
 
-		const IV = buf.slice(3, 16 + 3);
+		const IV = _getDecryptAesIV(buf);
 		const decipher = crypto.createDecipheriv('aes-256-cbc', AES_KEY, IV);
 
 		return decipher.update(buf.slice(16 + 3), 'utf8')
@@ -116,7 +123,11 @@ module.exports = function(aesObj, options) {
 	return {
 		encrypt,
 		decrypt,
-		// debug 使用
-		getDecryptAesVersion,
+		getDecryptAesVersion: function(sid) {
+			return _getDecryptAesVersion(_sidToBuffer(sid));
+		},
+		getDecryptAesIV: function(sid) {
+			return _getDecryptAesIV(_sidToBuffer(sid));
+		},
 	};
 };
