@@ -96,9 +96,8 @@ exports = module.exports = function(aesObj, options) {
 		return buf.slice(3, 16 + 3);
 	}
 
-	function decrypt(sid, userid) {
-		const buf = _sidToBuffer(sid);
 
+	function _getDecryptAesInfo(buf, userid) {
 		const FEATURE_FLAG = buf.readUInt8(1);
 		const isWithUserid = FEATURE_FLAG & FEATURE_USRID;
 		if (options.userid === true && !isWithUserid) throw new Error('USERID MISS');
@@ -118,6 +117,14 @@ exports = module.exports = function(aesObj, options) {
 		if (!Buffer.isBuffer(AES_KEY)) throw new Error('Not Found AES KEY');
 
 		const IV = _getDecryptAesIV(buf);
+
+		return { IV, AES_KEY };
+	}
+
+	function decrypt(sid, userid) {
+		const buf = _sidToBuffer(sid);
+
+		const { AES_KEY, IV } = _getDecryptAesInfo(buf, userid);
 		const decipher = crypto.createDecipheriv('aes-256-cbc', AES_KEY, IV);
 
 		return decipher.update(buf.slice(16 + 3), 'utf8')
@@ -134,6 +141,17 @@ exports = module.exports = function(aesObj, options) {
 		},
 		getDecryptAesIV: function(sid) {
 			return _getDecryptAesIV(_sidToBuffer(sid));
+		},
+
+		createDecipherFromSid: function(sid, userid) {
+			const buf = _sidToBuffer(sid);
+			const { AES_KEY, IV } = _getDecryptAesInfo(buf, userid);
+			return crypto.createDecipheriv('aes-256-cbc', AES_KEY, IV);
+		},
+		createCipherFromSid: function(sid, userid) {
+			const buf = _sidToBuffer(sid);
+			const { AES_KEY, IV } = _getDecryptAesInfo(buf, userid);
+			return crypto.createCipheriv('aes-256-cbc', AES_KEY, IV);
 		},
 	};
 };
