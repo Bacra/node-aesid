@@ -16,6 +16,9 @@ describe('#base', () => {
 		expect(sidAes1.decrypt(sid)).to.be(content);
 		// 跨业务，同sidkey
 		expect(sidAes2.decrypt(sid)).to.be(content);
+
+		expect(aesid.is(sidAes1)).to.be(true);
+		console.log(sidAes1.version());
 	});
 
 	it('#params', () => {

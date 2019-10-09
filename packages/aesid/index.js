@@ -1,13 +1,18 @@
 const crypto = require('crypto');
 const debug = require('debug')('aesid');
+const pkgVersion = require('./package.json').version;
 
 // 特性功能标识位
 const FEATURE_USRID = 1 << 0;
 
+function version() {
+	return pkgVersion;
+}
+
 /**
  * options.userid  true/false/auto  是否使用userid进行额外加密
  */
-module.exports = function(aesObj, options) {
+exports = module.exports = function(aesObj, options) {
 	if (!aesObj) throw new Error('AES KEY MISS');
 	if (!options) options = {};
 
@@ -122,6 +127,8 @@ module.exports = function(aesObj, options) {
 	return {
 		encrypt,
 		decrypt,
+		version,
+
 		getDecryptAesVersion: function(sid) {
 			return _getDecryptAesVersion(_sidToBuffer(sid));
 		},
@@ -129,4 +136,9 @@ module.exports = function(aesObj, options) {
 			return _getDecryptAesIV(_sidToBuffer(sid));
 		},
 	};
+};
+
+exports.version = version;
+exports.is = function(obj) {
+	return obj && obj.version === exports.version;
 };
