@@ -158,5 +158,11 @@ exports = module.exports = function(aesObj, options) {
 
 exports.version = version;
 exports.is = function(obj) {
-	return obj && obj.version === exports.version;
+	if (!obj) return false;
+	if (obj.version === exports.version) return true;
+
+	return typeof obj.version == 'function'
+		&& typeof obj.encrypt == 'function'
+		&& typeof obj.decrypt == 'function'
+		&& typeof obj.getDecryptAesVersion == 'function';
 };
