@@ -13,22 +13,17 @@
 
 ```javascript
 const aesid = require('aesid');
-const sidAes = aesid({
-  userid: true,   // true/false/auto
-  business: {
-    test: [
-      // mulit versions
-      { version: 2, aes: 'old test aes key' },
-      { version: 5, aes: 'new test aes key' },
-    ],
-    test2: 'test2 aes key'
-  }
-});
+const sidAes = aesid([
+    // mulit versions
+    { version: 2, aes: 'old test aes key' },
+    { version: 5, aes: 'new test aes key' },
+  ], {
+    userid: true,   // true/false/auto
+  });
 
 const sid = sidAes.encrypt('test', 'encrypt content');
 const content = sidAes.decrypt('test', sid);
 ```
-
 
 [npm-image]: https://img.shields.io/npm/v/aesid.svg
 [downloads-image]: https://img.shields.io/npm/dm/aesid.svg
