@@ -67,7 +67,7 @@ export class AesId {
 		debug('aesKeys init: %s', Object.keys(this.aesKeys));
 	}
 
-	encrypt(data: any, userid: any) {
+	encrypt(data: any, userid?: any) {
 		let isWithUserid = this.options.userid;
 		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid != 'string') {
 			if (!userid && isWithUserid === 'auto') {
@@ -110,7 +110,7 @@ export class AesId {
 		return Buffer.concat(output).toString('base64');
 	}
 
-	private _getDecryptAesInfo(buf: Buffer, userid: any) {
+	private _getDecryptAesInfo(buf: Buffer, userid?: any) {
 		const FEATURE_FLAG = buf.readUInt8(1);
 		const isWithUserid = FEATURE_FLAG & FEATURE_USRID;
 		if (this.options.userid === true && !isWithUserid) throw new Error('USERID MISS');
@@ -134,7 +134,7 @@ export class AesId {
 		return { IV, AES_KEY };
 	}
 
-	decrypt(sid: Buffer | string, userid: any) {
+	decrypt(sid: Buffer | string, userid?: any) {
 		const buf = _sidToBuffer(sid);
 
 		const { AES_KEY, IV } = this._getDecryptAesInfo(buf, userid);
@@ -152,13 +152,13 @@ export class AesId {
 		return _getDecryptAesIV(_sidToBuffer(sid));
 	}
 
-	createDecipherFromSid(sid: Buffer | string, userid: any) {
+	createDecipherFromSid(sid: Buffer | string, userid?: any) {
 		const buf = _sidToBuffer(sid);
 		const { AES_KEY, IV } = this._getDecryptAesInfo(buf, userid);
 		return crypto.createDecipheriv('aes-256-cbc', AES_KEY, IV);
 	}
 
-	createCipherFromSid(sid: Buffer | string, userid: any) {
+	createCipherFromSid(sid: Buffer | string, userid?: any) {
 		const buf = _sidToBuffer(sid);
 		const { AES_KEY, IV } = this._getDecryptAesInfo(buf, userid);
 		return crypto.createCipheriv('aes-256-cbc', AES_KEY, IV);
