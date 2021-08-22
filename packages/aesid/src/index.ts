@@ -18,7 +18,7 @@ function _getDecryptAesIV(buf: Buffer): Buffer {
 	return buf.slice(3, 16 + 3);
 }
 
-type AesVersionList = string | Array<{
+export type AesVers = string | Array<{
 	version: number,
 	aes: string,
 }>;
@@ -27,23 +27,23 @@ type AesKeysMap = {
 	[version: number]: Buffer
 };
 
-type AesOptions = {
+export type Options = {
 	userid?: boolean | 'auto',
 };
 
 export class AesId {
 	private aesKeys: AesKeysMap;
 	private lastAesVersion: number;
-	private options: AesOptions;
+	private options: Options;
 
-	constructor(aesObj: AesVersionList, options: AesOptions = {}) {
-		if (!aesObj) throw new Error('AES KEY MISS');
+	constructor(aesVers: AesVers, options: Options = {}) {
+		if (!aesVers) throw new Error('AES KEY MISS');
 
 		this.aesKeys = {};
 		this.options = options;
-		if (!Array.isArray(aesObj)) aesObj = [{version: 0, aes: aesObj}];
+		if (!Array.isArray(aesVers)) aesVers = [{version: 0, aes: aesVers}];
 
-		aesObj.forEach(item => {
+		aesVers.forEach(item => {
 			if (!item) return;
 
 			if (isNaN(item.version)) {
