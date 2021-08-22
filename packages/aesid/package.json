@@ -1,6 +1,6 @@
 {
   "name": "aesid",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "aes for sid",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
