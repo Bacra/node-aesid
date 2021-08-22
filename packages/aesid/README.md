@@ -12,8 +12,8 @@
 ## Usage
 
 ```javascript
-const aesid = require('aesid');
-const sidAes = aesid([
+import { AesId } from 'aesid';
+const sidAes = new AesId([
     // mulit versions
     { version: 2, aes: 'old test aes key' },
     { version: 5, aes: 'new test aes key' },
@@ -24,6 +24,14 @@ const sidAes = aesid([
 const sid = sidAes.encrypt('test', 'encrypt content');
 const content = sidAes.decrypt('test', sid);
 ```
+
+## Upgrade
+
+### 3.x => 4.x
+
+ * export `AesId` class
+ * remove `is` func
+
 
 [npm-image]: https://img.shields.io/npm/v/aesid.svg
 [downloads-image]: https://img.shields.io/npm/dm/aesid.svg

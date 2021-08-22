@@ -1,8 +1,8 @@
 const expect = require('expect.js');
-const aesid = require('../');
+const { AesId } = require('../');
 
 describe('#fromsid', () => {
-	const sidAes = aesid('test 123');
+	const sidAes = new AesId('test 123');
 	const sid = sidAes.encrypt('test content');
 
 	it('#base', () => {

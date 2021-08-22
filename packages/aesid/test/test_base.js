@@ -1,11 +1,11 @@
 const expect = require('expect.js');
-const aesid = require('../');
+const { AesId } = require('../');
 const debug = require('debug')('aesid:test_base');
 
 describe('#base', () => {
 	describe('#base', () => {
-		const sidAes1 = aesid('test 123');
-		const sidAes2 = aesid('test 123');
+		const sidAes1 = new AesId('test 123');
+		const sidAes2 = new AesId('test 123');
 
 		const content = 'test content';
 		const sid = sidAes1.encrypt(content);
@@ -18,30 +18,23 @@ describe('#base', () => {
 		expect(sidAes2.decrypt(sid)).to.be(content);
 	});
 
-	it('#is', () => {
-		const sidAes = aesid('ase key');
-		expect(aesid.is(sidAes)).to.be(true);
-		expect(aesid.is({})).to.be(false);
-		console.log(sidAes.version());
-	});
-
 	it('#params', () => {
 		expect(() => {
-			aesid();
+			new AesId();
 		})
 		.to.throwError(err => {
 			expect(err.message).to.be('AES KEY MISS');
 		});
 
 		expect(() => {
-			aesid([]);
+			new AesId([]);
 		})
 		.to.throwError(err => {
 			expect(err.message).to.be('AES KEY MISS');
 		});
 
 		expect(() => {
-			aesid([
+			new AesId([
 				{ version: 'a', aes: '234235' }
 			]);
 		})
@@ -50,7 +43,7 @@ describe('#base', () => {
 		});
 
 		expect(() => {
-			aesid([
+			new AesId([
 				{ version: 1, aes: '234235' },
 				{ version: 1, aes: '23443' }
 			]);
@@ -63,11 +56,11 @@ describe('#base', () => {
 
 	describe('#version', () => {
 		const content = 'test content';
-		const sidAes1 = aesid([
+		const sidAes1 = new AesId([
 			{version: 0, aes: 'test 123'},
 			{version: 3, aes: 'test 1234'},
 		]);
-		const sidAes2 = aesid([
+		const sidAes2 = new AesId([
 			{version: 3, aes: 'test 1234'},
 			{version: 0, aes: 'test 123'},
 		]);

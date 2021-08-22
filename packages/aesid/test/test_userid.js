@@ -1,17 +1,17 @@
 const expect = require('expect.js');
-const aesid = require('../');
+const { AesId } = require('../');
 
 describe('#userid', () => {
 	const content = 'test content';
 	const aseKey = 'test 123';
-	const noUseridSid = aesid(aseKey, {
+	const noUseridSid = new AesId(aseKey, {
 		userid: false,
 	})
 	.encrypt(content);
 
 
 	describe('#usrid types', () => {
-		const sidAes = aesid(aseKey, {
+		const sidAes = new AesId(aseKey, {
 			userid: true,
 		});
 
@@ -33,7 +33,7 @@ describe('#userid', () => {
 	});
 
 	describe('#options=true', () => {
-		const sidAes = aesid(aseKey, {
+		const sidAes = new AesId(aseKey, {
 			userid: true,
 		});
 
@@ -82,7 +82,7 @@ describe('#userid', () => {
 	});
 
 	describe('#options=auto', () => {
-		const sidAes = aesid(aseKey, {
+		const sidAes = new AesId(aseKey, {
 			userid: 'auto',
 		});
 

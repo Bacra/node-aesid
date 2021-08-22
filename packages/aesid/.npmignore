@@ -14,5 +14,6 @@ appveyor.yml
 .DS_Store
 
 test
+src
 coverage
 benchmark
