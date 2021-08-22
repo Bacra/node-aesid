@@ -1,6 +1,6 @@
 {
   "name": "aesid",
-  "version": "3.3.1",
+  "version": "4.0.0",
   "description": "aes for sid",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,10 +30,10 @@
     "debug": "^4.1.1"
   },
   "devDependencies": {
-    "typescript": "^4.3.5",
     "cross-env": "^6.0.0",
     "expect.js": "^0.3.1",
     "istanbul": "^0.4.5",
-    "mocha": "^6.2.1"
+    "mocha": "^6.2.1",
+    "typescript": "^4.3.5"
   }
 }
