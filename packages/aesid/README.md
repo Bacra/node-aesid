@@ -21,8 +21,8 @@ const sidAes = new AesId([
     userid: true,   // true/false/auto
   });
 
-const sid = sidAes.encrypt('test', 'encrypt content');
-const content = sidAes.decrypt('test', sid);
+const sid = sidAes.encrypt('encrypt content', 'userid');
+const content = sidAes.decrypt(sid, 'userid');
 ```
 
 ## Upgrade
