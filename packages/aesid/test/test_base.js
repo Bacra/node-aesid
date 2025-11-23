@@ -16,6 +16,12 @@ describe('#base', () => {
 		expect(sidAes1.decrypt(sid)).to.be(content);
 		// 跨业务，同sidkey
 		expect(sidAes2.decrypt(sid)).to.be(content);
+
+		// buffer
+		const resultBuf = sidAes2.decryptToBuffer(sid);
+		expect(resultBuf).to.be.an(Buffer);
+		expect(resultBuf.toString()).to.be(content);
+		expect(resultBuf.toString('base64')).to.be('dGVzdCBjb250ZW50');
 	});
 
 	it('#params', () => {

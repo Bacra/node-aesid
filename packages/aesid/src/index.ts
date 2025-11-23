@@ -144,6 +144,18 @@ export class AesId {
 			+ decipher.final('utf8');
 	}
 
+	public decryptToBuffer(sid: Buffer | string, userid?: any) {
+		const buf = _sidToBuffer(sid);
+
+		const { AES_KEY, IV } = this._getDecryptAesInfo(buf, userid);
+		const decipher = crypto.createDecipheriv('aes-256-cbc', AES_KEY, IV);
+
+		return Buffer.concat([
+			decipher.update(buf.slice(16 + 3)),
+			decipher.final()
+		]);
+	}
+
 	public getDecryptAesVersion(sid: Buffer | string) {
 		return _getDecryptAesVersion(_sidToBuffer(sid));
 	}
