@@ -27,7 +27,11 @@ const content = sidAes.decrypt(sid, 'userid');
 
 ## Upgrade
 
-### 3.x => 4.x
+### 5.x
+
+ * remove the `userid` option and add `userid` to the `aesVers` option accordingly.
+
+### 4.x
 
  * export `AesId` class
  * remove `is` func

@@ -18,30 +18,25 @@ function _getDecryptAesIV(buf: Buffer): Buffer {
 	return buf.slice(3, 16 + 3);
 }
 
-export type AesVers = string | Array<{
+type UseridType = boolean | 'auto';
+type AesVerOptions = {
 	version: number,
 	aes: string,
-}>;
 
-type AesKeysMap = {
-	[version: number]: Buffer
+	userid?: UseridType,
 };
+export type AesVers = string | Array<AesVerOptions>;
 
-export type Options = {
-	userid?: boolean | 'auto',
-};
 
 export class AesId {
-	private aesKeys: AesKeysMap;
+	private aesKeys: Record<number, { aes: Buffer, options: AesVerOptions }>;
 	private lastAesVersion: number;
-	private options: Options;
 
-	constructor(aesVers: AesVers, options: Options = {}) {
+	constructor(aesVers: AesVers) {
 		if (!aesVers) throw new Error('AES KEY MISS');
 
 		this.aesKeys = {};
-		this.options = options;
-		if (!Array.isArray(aesVers)) aesVers = [{version: 0, aes: aesVers}];
+		if (!Array.isArray(aesVers)) aesVers = [{ version: 0, aes: aesVers }];
 
 		aesVers.forEach(item => {
 			if (!item) return;
@@ -57,7 +52,10 @@ export class AesId {
 				throw new Error('AES VERSION IS REPEAT,' + version);
 			}
 
-			this.aesKeys[version] = Buffer.alloc(32, Buffer.from(item.aes));
+			this.aesKeys[version] = {
+				aes: Buffer.alloc(32, Buffer.from(item.aes)),
+				options: item,
+			};
 			this.lastAesVersion = version;
 		});
 
@@ -68,7 +66,10 @@ export class AesId {
 	}
 
 	public encrypt(data: any, userid?: any) {
-		let isWithUserid = this.options.userid;
+		const AES_VERSION = this.lastAesVersion;
+		const aesKeyItem = this.aesKeys[AES_VERSION];
+
+		let isWithUserid = aesKeyItem.options.userid;
 		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid != 'string') {
 			if (!userid && isWithUserid === 'auto') {
 				isWithUserid = false;
@@ -83,12 +84,10 @@ export class AesId {
 		}
 
 		const IV = crypto.randomBytes(16);
-		const AES_VERSION = this.lastAesVersion;
-		const BUSINESS_AES_KEY = this.aesKeys[AES_VERSION];
 
 		const AES_KEY = isWithUserid
-			? crypto.createHmac('sha256', BUSINESS_AES_KEY).update(userid).digest()
-			: BUSINESS_AES_KEY;
+			? crypto.createHmac('sha256', aesKeyItem.aes).update(userid).digest()
+			: aesKeyItem.aes;
 
 		const buf = Buffer.isBuffer(data) ? data : Buffer.from('' + data);
 		let flag = 0;
@@ -111,21 +110,21 @@ export class AesId {
 	}
 
 	private _getDecryptAesInfo(buf: Buffer, userid?: any) {
+		const AES_VERSION = _getDecryptAesVersion(buf);
+		const aesKeyItem = this.aesKeys[AES_VERSION];
+		if (!aesKeyItem) throw new Error('BUSINESS_AES_KEY MISS');
+
 		const FEATURE_FLAG = buf.readUInt8(1);
 		const isWithUserid = FEATURE_FLAG & FEATURE_USRID;
-		if (this.options.userid === true && !isWithUserid) throw new Error('USERID MISS');
+		if (aesKeyItem.options.userid === true && !isWithUserid) throw new Error('USERID MISS');
 
 		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid != 'string') {
 			userid = '' + userid;
 		}
 
-		const AES_VERSION = _getDecryptAesVersion(buf);
-		const BUSINESS_AES_KEY = this.aesKeys[AES_VERSION];
-		if (!BUSINESS_AES_KEY) throw new Error('BUSINESS_AES_KEY MISS');
-
 		const AES_KEY = isWithUserid
-			? crypto.createHmac('sha256', BUSINESS_AES_KEY).update(userid).digest()
-			: BUSINESS_AES_KEY;
+			? crypto.createHmac('sha256', aesKeyItem.aes).update(userid).digest()
+			: aesKeyItem.aes;
 
 		if (!Buffer.isBuffer(AES_KEY)) throw new Error('Not Found AES KEY');
 

@@ -4,16 +4,20 @@ const { AesId } = require('../');
 describe('#userid', () => {
 	const content = 'test content';
 	const aseKey = 'test 123';
-	const noUseridSid = new AesId(aseKey, {
+	const noUseridSid = new AesId([{
+		aes: aseKey,
+		version: 0,
 		userid: false,
-	})
+	}])
 	.encrypt(content);
 
 
 	describe('#usrid types', () => {
-		const sidAes = new AesId(aseKey, {
+		const sidAes = new AesId([{
+			aes: aseKey,
+			version: 0,
 			userid: true,
-		});
+		}]);
 
 		it('#string', () => {
 			const sid = sidAes.encrypt(content, 'userid123');
@@ -33,9 +37,11 @@ describe('#userid', () => {
 	});
 
 	describe('#options=true', () => {
-		const sidAes = new AesId(aseKey, {
+		const sidAes = new AesId([{
+			aes: aseKey,
+			version: 0,
 			userid: true,
-		});
+		}]);
 
 		it('#noUseridSid', () => {
 			expect(() => {
@@ -82,9 +88,11 @@ describe('#userid', () => {
 	});
 
 	describe('#options=auto', () => {
-		const sidAes = new AesId(aseKey, {
+		const sidAes = new AesId([{
+			aes: aseKey,
+			version: 0,
 			userid: 'auto',
-		});
+		}]);
 
 		it('#noUseridSid', () => {
 			expect(sidAes.decrypt(noUseridSid)).to.be(content);
