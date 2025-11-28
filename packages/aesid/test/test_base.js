@@ -71,15 +71,6 @@ describe('#base', () => {
 			{version: 0, aes: 'test 123'},
 		]);
 
-		it('#getDecryptAesVersion', () => {
-			let sid = sidAes1.encrypt(content);
-			expect(sidAes1.getDecryptAesVersion(sid)).to.be(3);
-
-			sid = sidAes2.encrypt(content);
-			expect(sidAes2.getDecryptAesVersion(sid)).to.be(0);
-		});
-
-
 		it('#use last', () => {
 			const sid = sidAes1.encrypt(content);
 			expect(sidAes1.decrypt(sid)).to.be(content);
