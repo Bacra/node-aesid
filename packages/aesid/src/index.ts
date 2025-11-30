@@ -155,6 +155,14 @@ export class AesId {
 		]);
 	}
 
+	public getDecryptAesVersion(sid: Buffer | string) {
+		return _getDecryptAesVersion(_sidToBuffer(sid));
+	}
+
+	public getDecryptAesIV(sid: Buffer | string) {
+		return _getDecryptAesIV(_sidToBuffer(sid));
+	}
+
 	public createDecipherFromSid(sid: Buffer | string, userid?: any) {
 		const buf = _sidToBuffer(sid);
 		const { AES_KEY, IV } = this._getDecryptAesInfo(buf, userid);
