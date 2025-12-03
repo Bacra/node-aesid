@@ -6,7 +6,7 @@ export const version = require('../package.json').version;
 // 特性功能标识位
 const FEATURE_USRID = 1 << 0;
 
-function _sidToBuffer(sid: Buffer | string): Buffer {
+function _sidToBuffer(sid: DecryptData): Buffer {
 	return Buffer.isBuffer(sid) ? sid : Buffer.from(sid, 'base64');
 }
 
@@ -25,7 +25,8 @@ type AesVerOptions = {
 	userid?: boolean,
 };
 export type AesVers = string | Array<AesVerOptions>;
-
+export type EncryptData = string | Buffer | any;
+export type DecryptData = string | Buffer;
 
 export class AesId {
 	private aesKeys: Record<number, { aes: Buffer, options: AesVerOptions }>;
@@ -64,25 +65,27 @@ export class AesId {
 		debug('aesKeys init: %s', Object.keys(this.aesKeys));
 	}
 
-	public encrypt(data: any, userid?: any) {
+	public encrypt(data: EncryptData, userid?: EncryptData) {
 		const AES_VERSION = this.lastAesVersion;
 		const aesKeyItem = this.aesKeys[AES_VERSION];
 
-		let isWithUserid = aesKeyItem.options.userid;
-		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid !== 'string') {
-			if (!userid) debug('no userid in options.userid=true: %o', userid);
-			userid = '' + userid;
+		const isWithUserid = aesKeyItem.options.userid;
+		let AES_KEY: Buffer;
+		let flag = 0;
+		if (isWithUserid) {
+			if (typeof userid === 'undefined') throw new Error('MISS USERID');
+
+			AES_KEY = crypto.createHmac('sha256', aesKeyItem.aes)
+				.update(Buffer.isBuffer(userid) ? userid : '' + userid)
+				.digest();
+
+			flag |= FEATURE_USRID;
+		} else {
+			AES_KEY = aesKeyItem.aes;
 		}
 
 		const IV = crypto.randomBytes(16);
-
-		const AES_KEY = isWithUserid
-			? crypto.createHmac('sha256', aesKeyItem.aes).update(userid).digest()
-			: aesKeyItem.aes;
-
 		const buf = Buffer.isBuffer(data) ? data : Buffer.from('' + data);
-		let flag = 0;
-		if (isWithUserid) flag |= FEATURE_USRID;
 
 		const output = [
 			// 预留版本号
@@ -100,32 +103,35 @@ export class AesId {
 		return Buffer.concat(output).toString('base64');
 	}
 
-	private _getDecryptAesInfo(buf: Buffer, userid?: any) {
+	private _getDecryptAesInfo(buf: Buffer, userid?: EncryptData) {
 		const AES_VERSION = _getDecryptAesVersion(buf);
 		const aesKeyItem = this.aesKeys[AES_VERSION];
 		if (!aesKeyItem) throw new Error('BUSINESS_AES_KEY MISS');
+		if (!Buffer.isBuffer(aesKeyItem.aes)) throw new Error('Not Found AES KEY');
 
 		const FEATURE_FLAG = buf.readUInt8(1);
 		const isWithUserid = FEATURE_FLAG & FEATURE_USRID;
 		if (aesKeyItem.options.userid === true && !isWithUserid) throw new Error('USERID MISS');
 		if (!aesKeyItem.options.userid && isWithUserid) throw new Error('INVALD USERID FLAG');
 
-		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid !== 'string') {
-			userid = '' + userid;
+		let AES_KEY: Buffer;
+		if (isWithUserid) {
+			if (typeof userid === 'undefined') throw new Error('MISS USERID');
+
+			AES_KEY = crypto.createHmac('sha256', aesKeyItem.aes)
+				.update(Buffer.isBuffer(userid) ? userid : '' + userid)
+				.digest();
+		} else {
+			AES_KEY = aesKeyItem.aes;
 		}
 
-		const AES_KEY = isWithUserid
-			? crypto.createHmac('sha256', aesKeyItem.aes).update(userid).digest()
-			: aesKeyItem.aes;
-
-		if (!Buffer.isBuffer(AES_KEY)) throw new Error('Not Found AES KEY');
-
-		const IV = _getDecryptAesIV(buf);
-
-		return { IV, AES_KEY };
+		return {
+			IV: _getDecryptAesIV(buf),
+			AES_KEY,
+		};
 	}
 
-	public decrypt(sid: Buffer | string, userid?: any) {
+	public decrypt(sid: DecryptData, userid?: EncryptData) {
 		const buf = _sidToBuffer(sid);
 
 		const { AES_KEY, IV } = this._getDecryptAesInfo(buf, userid);
@@ -135,7 +141,7 @@ export class AesId {
 			+ decipher.final('utf8');
 	}
 
-	public decryptToBuffer(sid: Buffer | string, userid?: any) {
+	public decryptToBuffer(sid: DecryptData, userid?: EncryptData) {
 		const buf = _sidToBuffer(sid);
 
 		const { AES_KEY, IV } = this._getDecryptAesInfo(buf, userid);
@@ -147,21 +153,21 @@ export class AesId {
 		]);
 	}
 
-	public getDecryptAesVersion(sid: Buffer | string) {
+	public getDecryptAesVersion(sid: DecryptData) {
 		return _getDecryptAesVersion(_sidToBuffer(sid));
 	}
 
-	public getDecryptAesIV(sid: Buffer | string) {
+	public getDecryptAesIV(sid: DecryptData) {
 		return _getDecryptAesIV(_sidToBuffer(sid));
 	}
 
-	public createDecipherFromSid(sid: Buffer | string, userid?: any) {
+	public createDecipherFromSid(sid: DecryptData, userid?: EncryptData) {
 		const buf = _sidToBuffer(sid);
 		const { AES_KEY, IV } = this._getDecryptAesInfo(buf, userid);
 		return crypto.createDecipheriv('aes-256-cbc', AES_KEY, IV);
 	}
 
-	public createCipherFromSid(sid: Buffer | string, userid?: any) {
+	public createCipherFromSid(sid: DecryptData, userid?: EncryptData) {
 		const buf = _sidToBuffer(sid);
 		const { AES_KEY, IV } = this._getDecryptAesInfo(buf, userid);
 		return crypto.createCipheriv('aes-256-cbc', AES_KEY, IV);

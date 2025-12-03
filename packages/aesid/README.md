@@ -25,12 +25,18 @@ const sid = sidAes.encrypt('encrypt content', 'userid');
 const content = sidAes.decrypt(sid, 'userid');
 ```
 
+ * `userid` and DecryptData can only be `string` or `Buffer`. If the type is not `string` or `buffer`, it will be forcibly cast to `string`.
+
+
 ## Upgrade
 
 ### 5.x
 
  * remove the `userid` option and add `userid` to the `aesVers` option accordingly.
- * remove `userid=auto`
+ * remove `option.userid=auto`.
+ * throw error if `userid` is not provided when `option.userid` is `true`.
+ * throw error if `userid` status of sid flag and `option.userid` are not the same.
+
 
 ### 4.x
 

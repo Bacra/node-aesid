@@ -4,86 +4,78 @@ const { AesId } = require('../');
 describe('#userid', () => {
 	const content = 'test content';
 	const aseKey = 'test 123';
-	const noUseridSid = new AesId([{
+	const withUseridSidAes = new AesId([{
+		aes: aseKey,
+		version: 0,
+		userid: true,
+	}]);
+
+	const noUseridSidAes = new AesId([{
 		aes: aseKey,
 		version: 0,
 		userid: false,
-	}])
-	.encrypt(content);
+	}]);
 
+	it('#encrypt error', () => {
+		expect(() => {
+			withUseridSidAes.encrypt(content);
+		})
+		.to.throwError('USERID MISS');
+	});
 
-	describe('#usrid types', () => {
-		const sidAes = new AesId([{
-			aes: aseKey,
-			version: 0,
-			userid: true,
-		}]);
-
+	describe('#userid params types', () => {
 		it('#string', () => {
-			const sid = sidAes.encrypt(content, 'userid123');
-			expect(sidAes.decrypt(sid, 'userid123')).to.be(content);
+			const sid = withUseridSidAes.encrypt(content, 'userid123');
+			expect(withUseridSidAes.decrypt(sid, 'userid123')).to.be(content);
 		});
 
 		it('#number', () => {
-			const sid = sidAes.encrypt(content, 1234);
-			expect(sidAes.decrypt(sid, 1234)).to.be(content);
+			const sid = withUseridSidAes.encrypt(content, 1234);
+			expect(withUseridSidAes.decrypt(sid, 1234)).to.be(content);
 		});
 
 		it('#buffer', () => {
 			const useridBuf = Buffer.from('userid');
-			const sid = sidAes.encrypt(content, useridBuf);
-			expect(sidAes.decrypt(sid, useridBuf)).to.be(content);
+			const sid = withUseridSidAes.encrypt(content, useridBuf);
+			expect(withUseridSidAes.decrypt(sid, useridBuf)).to.be(content);
 		});
 	});
 
-	describe('#options=true', () => {
-		const sidAes = new AesId([{
-			aes: aseKey,
-			version: 0,
-			userid: true,
-		}]);
-
-		it('#noUseridSid', () => {
+	describe('#cross-analysis data', () => {
+		it('#withUseridSidAes => noUseridSidAes', () => {
 			expect(() => {
-				sidAes.decrypt(noUseridSid);
-				process.exit();
+				withUseridSidAes.decrypt(noUseridSidAes.encrypt(content));
 			})
 			.to.throwError(function(err) {
 				expect(err.message).to.be('USERID MISS');
 			});
 		});
 
-		describe('#with userid encrypt', () => {
-			const sid = sidAes.encrypt(content, 'userid123');
-
-			it('#no userid decrypt', () => {
-				expect(() => {
-					sidAes.decrypt(sid);
-				})
-				.to.throwError(/bad decrypt/);
-			});
-
-			it('#not userid decrypt', () => {
-				expect(() => {
-					sidAes.decrypt(sid, 'userid456');
-				})
-				.to.throwError(/bad decrypt/);
+		it('#noUseridSidAes => withUseridSidAes', () => {
+			expect(() => {
+				noUseridSidAes.decrypt(withUseridSidAes.encrypt(content, 'userid123'));
+			})
+			.to.throwError(function(err) {
+				expect(err.message).to.be('INVALD USERID FLAG');
 			});
 		});
+	});
 
-		describe('#without useid encrypt', () => {
-			const sid = sidAes.encrypt(content);
+	describe('#with userid encrypt', () => {
+		const sid = withUseridSidAes.encrypt(content, 'userid123');
 
-			it('#no userid decrypt', () => {
-				expect(sidAes.decrypt(sid)).to.be(content);
-			});
+		it('#no userid', () => {
+			expect(() => {
+				withUseridSidAes.decrypt(sid);
+			})
+			.to.throwError('USERID MISS');
+		});
 
-			it('#not userid decrypt', () => {
-				expect(() => {
-					sidAes.decrypt(sid, 'userid123')
-				})
-				.to.throwError(/bad decrypt/);
-			});
+		it('#userid not same', () => {
+			expect(() => {
+				withUseridSidAes.decrypt(sid, 'userid456');
+			})
+			.to.throwError(/bad decrypt/);
 		});
 	});
 });
