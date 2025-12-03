@@ -86,44 +86,4 @@ describe('#userid', () => {
 			});
 		});
 	});
-
-	describe('#options=auto', () => {
-		const sidAes = new AesId([{
-			aes: aseKey,
-			version: 0,
-			userid: 'auto',
-		}]);
-
-		it('#noUseridSid', () => {
-			expect(sidAes.decrypt(noUseridSid)).to.be(content);
-		});
-
-		describe('#with userid encrypt', () => {
-			const sid = sidAes.encrypt(content, 'userid123');
-
-			it('#userid decrypt', () => {
-				expect(sidAes.decrypt(sid, 'userid123')).to.be(content);
-			});
-
-			it('#no userid decrypt', () => {
-				expect(() => {
-					sidAes.decrypt(sid)
-				})
-				.to.throwError(/bad decrypt/);
-			});
-		});
-
-		describe('#without userid encrypt', () => {
-			const sid = sidAes.encrypt(content);
-
-			it('#userid decrypt', () => {
-				expect(sidAes.decrypt(sid, 'userid123')).to.be(content);
-			});
-
-			it('#no userid decrypt', () => {
-				expect(sidAes.decrypt(sid)).to.be(content);
-			});
-		});
-	});
-
 });

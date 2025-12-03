@@ -18,12 +18,11 @@ function _getDecryptAesIV(buf: Buffer): Buffer {
 	return buf.slice(3, 16 + 3);
 }
 
-type UseridType = boolean | 'auto';
 type AesVerOptions = {
 	version: number,
 	aes: string | Buffer,
 
-	userid?: UseridType,
+	userid?: boolean,
 };
 export type AesVers = string | Array<AesVerOptions>;
 
@@ -60,7 +59,7 @@ export class AesId {
 		});
 
 		// @ts-ignore
-		if (this.lastAesVersion === undefined) throw new Error('AES KEY MISS');
+		if (typeof this.lastAesVersion === 'undefined') throw new Error('AES KEY MISS');
 
 		debug('aesKeys init: %s', Object.keys(this.aesKeys));
 	}
@@ -70,16 +69,8 @@ export class AesId {
 		const aesKeyItem = this.aesKeys[AES_VERSION];
 
 		let isWithUserid = aesKeyItem.options.userid;
-		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid != 'string') {
-			if (!userid && isWithUserid === 'auto') {
-				isWithUserid = false;
-				debug('userid auto, ignore userid');
-			}
-
-			if (!userid && isWithUserid === true) {
-				debug('no userid in options.userid=true: %o', userid);
-			}
-
+		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid !== 'string') {
+			if (!userid) debug('no userid in options.userid=true: %o', userid);
 			userid = '' + userid;
 		}
 
@@ -117,8 +108,9 @@ export class AesId {
 		const FEATURE_FLAG = buf.readUInt8(1);
 		const isWithUserid = FEATURE_FLAG & FEATURE_USRID;
 		if (aesKeyItem.options.userid === true && !isWithUserid) throw new Error('USERID MISS');
+		if (!aesKeyItem.options.userid && isWithUserid) throw new Error('INVALD USERID FLAG');
 
-		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid != 'string') {
+		if (isWithUserid && !Buffer.isBuffer(userid) && typeof userid !== 'string') {
 			userid = '' + userid;
 		}
 

@@ -30,6 +30,7 @@ const content = sidAes.decrypt(sid, 'userid');
 ### 5.x
 
  * remove the `userid` option and add `userid` to the `aesVers` option accordingly.
+ * remove `userid=auto`
 
 ### 4.x
 
