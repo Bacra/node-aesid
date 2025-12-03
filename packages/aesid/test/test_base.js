@@ -5,7 +5,7 @@ const debug = require('debug')('aesid:test_base');
 describe('#base', () => {
 	describe('#base', () => {
 		const sidAes1 = new AesId('test 123');
-		const sidAes2 = new AesId('test 123');
+		const sidAes2 = new AesId(Buffer.from('test 123'));
 
 		const content = 'test content';
 		const sid = sidAes1.encrypt(content);

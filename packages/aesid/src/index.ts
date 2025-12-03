@@ -21,7 +21,7 @@ function _getDecryptAesIV(buf: Buffer): Buffer {
 type UseridType = boolean | 'auto';
 type AesVerOptions = {
 	version: number,
-	aes: string,
+	aes: string | Buffer,
 
 	userid?: UseridType,
 };
@@ -53,7 +53,7 @@ export class AesId {
 			}
 
 			this.aesKeys[version] = {
-				aes: Buffer.alloc(32, Buffer.from(item.aes)),
+				aes: Buffer.alloc(32, Buffer.isBuffer(item.aes) ? item.aes : Buffer.from(item.aes)),
 				options: item,
 			};
 			this.lastAesVersion = version;
