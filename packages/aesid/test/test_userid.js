@@ -16,12 +16,12 @@ describe('#userid', () => {
 		userid: false,
 	}]);
 
-	it('#encrypt error', () => {
-		expect(() => {
-			withUseridSidAes.encrypt(content);
-		})
-		.to.throwError('USERID MISS');
-	});
+	// it('#encrypt error', () => {
+	// 	expect(() => {
+	// 		withUseridSidAes.encrypt(content);
+	// 	})
+	// 	.to.throwError('USERID MISS');
+	// });
 
 	describe('#userid params types', () => {
 		it('#string', () => {

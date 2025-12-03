@@ -73,8 +73,6 @@ export class AesId {
 		let AES_KEY: Buffer;
 		let flag = 0;
 		if (isWithUserid) {
-			if (typeof userid === 'undefined') throw new Error('MISS USERID');
-
 			AES_KEY = crypto.createHmac('sha256', aesKeyItem.aes)
 				.update(Buffer.isBuffer(userid) ? userid : '' + userid)
 				.digest();
@@ -116,8 +114,6 @@ export class AesId {
 
 		let AES_KEY: Buffer;
 		if (isWithUserid) {
-			if (typeof userid === 'undefined') throw new Error('MISS USERID');
-
 			AES_KEY = crypto.createHmac('sha256', aesKeyItem.aes)
 				.update(Buffer.isBuffer(userid) ? userid : '' + userid)
 				.digest();

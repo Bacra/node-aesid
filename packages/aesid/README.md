@@ -34,7 +34,6 @@ const content = sidAes.decrypt(sid, 'userid');
 
  * remove the `userid` option and add `userid` to the `aesVers` option accordingly.
  * remove `option.userid=auto`.
- * throw error if `userid` is not provided when `option.userid` is `true`.
  * throw error if `userid` status of sid flag and `option.userid` are not the same.
 
 
